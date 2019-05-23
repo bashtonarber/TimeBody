@@ -1,0 +1,83 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TimeBody : MonoBehaviour
+{
+    // Ashton Barber
+    // This script controls the rewind ability and attached to a button, when the button is pressed the the objects that have the script are moved back to the position they moved from, this includes the path they just took and the rotation. 
+
+
+    public static bool isRewinding = false; 
+
+    public float recordTime = 100f; // How long the rewind ability goes on for. 
+
+    List<PointInTime> pointsInTime;
+
+
+    void Start()
+    {
+        pointsInTime = new List<PointInTime>();
+        recordTime = 100;
+    }
+
+    void FixedUpdate()
+    {
+        if (isRewinding)
+        {
+            Rewind(); // If isRewinding bool is true then the rewind function is called.
+        }
+        else // Else if the bool is false the record function is called.
+        {
+            Record();
+        }
+
+   }
+
+    void Rewind()
+    {
+        if (pointsInTime.Count > 0) // If the count is less than 0, the current objects position and rotation equals the pointInTime position and rotation (only as far back as the recordTime).
+        {
+            PointInTime pointInTime = pointsInTime[0];
+            transform.position = pointInTime.position;
+            transform.rotation = pointInTime.rotation;
+            pointsInTime.RemoveAt(0);
+        }
+        else // Else the StopRewind function is called.
+        {
+            StopRewind();
+        }
+    }
+
+    void Record() 
+    {
+        if (pointsInTime.Count > Mathf.Round(recordTime / Time.fixedDeltaTime))
+        {
+            pointsInTime.RemoveAt(pointsInTime.Count - 1);
+        }
+        ObjectRecord();
+    }
+
+    public void StartRewind() // if the button is down the isRewinding bool is true and the rewinding bool from the PlayerController is true.
+    {
+        isRewinding = true;
+        PlayerController.rewinding = true;
+    }
+
+    public void StopRewind() // If the button is up the isRewinding bool is false and the rewinding bool from the PlayerController is false.
+    {
+        isRewinding = false;
+        PlayerController.rewinding = false;
+    }
+
+    public void RewindPointer() // Calls the startRewind function.
+    {
+        StartRewind();
+    }
+
+    void ObjectRecord() // This function gets the position and rotation from the PointsInTime script.
+    {
+        pointsInTime.Insert(0, new PointInTime(transform.position, transform.rotation));
+    }
+
+}
